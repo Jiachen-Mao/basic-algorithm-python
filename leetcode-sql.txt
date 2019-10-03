@@ -1,0 +1,121 @@
+## Combine two tables
+
+SELECT FirstName, LastName, City, State 
+FROM Person LEFT JOIN Address 
+ON Person.PersonId = Address.PersonId
+
+
+
+## Second highest salary
+
+SELECT (SELECT MAX(Salary)
+FROM Employee
+WHERE Salary NOT IN (SELECT MAX(Salary) FROM Employee)) SecondHighestSalary
+
+SELECT (SELECT Salary FROM Employee GROUP BY Salary ORDER BY Salary DESC LIMIT 1,1) SecondHighestSalary
+
+
+
+## Nth highest salary
+
+CREATE FUNCTION getNthHighestSalary(N INT) RETURNS INT
+BEGIN
+	RETURN (
+		SELECT MAX(Salary)
+			FROM Employee Emp1
+			WHERE (N - 1) = (
+				SELECT COUNT(DISTINCT(Emp2.Salary))
+					FROM Employee Emp2
+					WHERE Emp2.Salary > Emp1.Salary)
+	);
+END
+
+
+
+## Rank scores
+
+SELECT Score, (SELECT COUNT(DISTINCT(Score)) FROM Scores b WHERE b.Score > a.Score) + 1 AS Rank
+FROM Scores a
+ORDER BY Score DESC
+
+
+
+## Consecutive numbers
+
+SELECT DISTINCT l1.Num AS ConsecutiveNums
+FROM Logs l1, Logs l2, Logs l3
+WHERE l1.Id + 1 = l2.Id AND l2.Id + 1 = l3.Id AND l1.Num = l2.Num AND l2.Num = l3.Num
+
+
+
+## Employees earning more than their managers
+
+SELECT e.Name AS Employee FROM Employee e LEFT JOIN Employee b
+ON e.ManagerId = b.Id
+WHERE e.Salary > b.Salary
+
+SELECT Name AS Employee
+FROM Employee e
+WHERE e.ManagerId IS NULL AND e.Salary > (SELECT Salary FROM Employee WHERE e.ManagerId = Id)
+
+
+
+## Duplicate emails
+
+SELECT Email FROM Person GROUP BY Email HAVING COUNT(*) > 1
+
+
+
+## Customers who never order
+
+SELECT Name AS Customers FROM Customers WHERE Id NOT IN (SELECT CustomerID FROM Orders)
+
+SELECT Customers.Name AS Customers 
+FROM (Customers LEFT JOIN Orders ON Customers.Id = Orders.CustomerId)
+WHERE Orders.CustomerId is NULL
+
+
+
+## Department highest salary
+
+SELECT Department.Name AS Department, Employee.Name AS Employee, Employee.Salary AS Salary
+FROM Department JOIN Employee ON Employee.DepartmentId = Department.Id
+WHERE Employee.Salary IN (SELECT MAX(e.Salary) FROM Employee e WHERE e.DepartmentId = Employee.DepartmentId)
+
+
+
+## Department top three salaries
+
+SELECT D.Name AS Deparment, E.Name AS Employee, E.Salary AS Salary
+FROM Employee E INNER JOIN Department D ON E.DepartmentId = D.Id
+WHERE (SELECT COUNT(DISTINCT(Salary)) FROM Employee
+	WHERE DepartmentId = E.DepartmentId AND Salary > E.Salary) < 3
+ORDER BY E.DepartmentId, E.Salary DESC;
+
+
+
+## Delete duplicate emails
+
+DELETE p1
+FROM Person p1, Person p2
+WHERE p1.Email = p2.Email AND p1.Id > p2.Id
+
+
+
+## Rising temperature
+
+SELECT wt1.Id
+FROM Weather wt1, Weather wt2
+WHERE wt1.Temperature > wt2.Temperature AND
+	TO_DAYS(wt1.Date) - TO_DAYS(wt2.Date) = 1
+
+
+
+## Trips and users
+
+SELECT t.Request_at Day, ROUND(SUM(CASE WHEN t.Status = 'completed' THEN 0 ELSE 1 END) / COUNT(*), 2) Rate
+FROM Trips t
+INNER JOIN Users u
+ON t.Client_Id = u.Users_Id AND u.Banned = 'No'
+WHERE t.Request_at BETWEEN '2013-10-01' AND '2013-10-03'
+GROUP BY t.Request_at
