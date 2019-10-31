@@ -119,3 +119,119 @@ INNER JOIN Users u
 ON t.Client_Id = u.Users_Id AND u.Banned = 'No'
 WHERE t.Request_at BETWEEN '2013-10-01' AND '2013-10-03'
 GROUP BY t.Request_at
+
+
+
+## 614 Second Degree Follower
+
+SELECT DISTINCT b.follower, c.count NUM FROM follow b JOIN
+(SELECT a.followee, count(DISTINCT follower) count FROM follow a GROUP BY a.followee) c ON (b.follower = c.followee)
+ORDER BY b.follower
+
+
+
+## 178 Rank Score
+
+SELECT a.score Score, (SELECT COUNT(DISTINCT b.score) + 1 FROM scores b WHERE a.score < b.score) Rank FROM scores a ORDER BY a.score DESC
+
+
+
+## 176 Second Highest Salary
+
+SELECT MAX(Salary) AS SecondHighestSalary FROM Employee
+WHERE Salary NOT IN (SELECT MAX(Salary) FROM Employee)
+
+
+
+## 627 Swap Salary
+
+UPDATE salary SET sex = (CASE WHEN sex = 'f' THEN 'm' ELSE 'f' END)
+SELECT * FROM salary
+
+
+
+## 180 Consecutive Numbers
+
+SELECT DISTINCT a.num AS ConsecutiveNums FROM logs a WHERE
+a.num = (SELECT b.num FROM logs b WHERE b.id > a.id ORDER BY b.id LIMIT 1 OFFSET 0) AND
+a.num = (SELECT c.num FROM logs c WHERE c.id > a.id ORDER BY c.id LIMIT 1 OFFSET 1)
+
+
+
+## 585 Investments in 2016
+
+SELECT SUM(tiv_2016) FROM insurance a LEFT OUTER JOIN
+(SELECT b.lat, b.lon FROM insurance b GROUP BY b.lat, b.lon HAVING COUNT(*) > 1) c ON (a.lat = c.lat AND a.lon = c.lon) LEFT OUTER JOIN
+(SELECT d.tiv_2015 FROM insurance d GROUP BY d.tiv_2015 HAVING COUNT(*) > 1) e ON (a.tiv_2015 = e.tiv_2015) WHERE c.lat IS NULL AND c.lon IS NULL AND e.tiv_2015 IS NOT NULL
+
+
+
+## 610 Taiangle Judgement
+
+SELECT x, y, z, IF(x + y > z AND y + z > x AND z + x > y, 'Yes', 'No') triangle FROM triangle
+
+
+
+## 596 Classes more than 5 students
+
+SELECT class FROM courses GROUP BY class HAVING COUNT(DISTINCT student) >= 5
+
+
+
+## Combine two tables
+
+SELECT p.FirstName, p.LastName, a.City, a.State FROM Person p
+LEFT OUTER JOIN Address a ON (p.PersonId = a.PersonId)
+
+
+
+## 579 Find Cumulative Salary of an Employee
+
+SELECT e1.id, e1.month, (SELECT SUM(e2.salary) FROM employee e2 WHERE e2.id = e1.id and e2.month >= e1.month - 2 AND e2.month <= e1.month GROUP BY e2.id) Salary
+FROM employee e1
+WHERE e1.month NOT IN (SELECT MAX(e3.month) FROM employee e3 WHERE e3.id = e1.id)
+GROUP BY e1.id, e1.month
+ORDER BY e1.id ASC, e1.month DESC
+
+
+
+## 184 Department Highest Salary
+
+SELECT c.name AS Department, b.name AS Employee, b.salary AS Salary
+FROM employee b, (SELECT departmentid, MAX(salary) AS max_salary FROM employee GROUP BY departmentid) a, department c
+WHERE a.departmentid = b.departmentid AND a.max_salary = b.salary AND b.departmentid = c.id
+
+
+
+## 183 Customers who never order
+
+SELECT name AS customers FROM customers c
+WHERE c.Id NOT IN (SELECT o.customerId FROM orders o)
+
+
+
+## 570 Managers with at least 5 direct reports
+
+SELECT a.name FROM employee a INNER JOIN employee b ON (a.id = b.managerid) GROUP BY a.name HAVING COUNT(DISTINCT b.id) >= 5
+
+
+
+## 602 Friend Request II: Who has the most friends
+
+SELECT a.requester_id id,
+    (SELECT COUNT(1) FROM request_accepted b
+    WHERE b.accepter_id = a.requester_id
+    OR b_requester_id = a.requester_id
+    ) num
+FROM request_accepted a
+ORDER BY num DESC
+LIMIT 1
+
+
+
+## 574 Winning Candidate
+
+SELECT a.name FROM candidate a INNER JOIN
+(SELECT candidateid, count(*) no_of_votes FROM vote
+GROUP BY candidateid ORDER BY no_of_votes DESC LIMIT 1
+) b ON a.id = b.candidateid
