@@ -235,3 +235,66 @@ SELECT a.name FROM candidate a INNER JOIN
 (SELECT candidateid, count(*) no_of_votes FROM vote
 GROUP BY candidateid ORDER BY no_of_votes DESC LIMIT 1
 ) b ON a.id = b.candidateid
+
+
+
+## 571 Find Median given a frequency of numbers
+
+SELECT AVG(Number) median FROM Numbers n
+WHERE n.Frequency >= ABS((SELECT SUM(Frequency) FROM Numbers WHERE
+Number <= n.Number) - (SELECT SUM(Frequency) FROM Numbers WHERE Number >= n.Number))
+
+
+
+## 578 Get Highest Answer Rate Question
+
+SELECT question_id FROM
+(SELECT a.question_id, SUM(IF(a.answer_id IS NULL, 0, 1)) / COUNT(a.question_id) ans_rate FROM survey_log a GROUP BY a.question_id) c
+ORDER BY ans_rate DESC LIMIT 1
+
+
+
+## 577 Employee Bonus
+
+SELECT a.name, b.bonus
+FROM employee a
+LEFT OUTER JOIN bonus b ON (a.empid = b.empid)
+WHERE IFNULL(bonus, -1) < 1000
+
+
+
+## 580 Count student number in departments
+
+SELECT a.dept_name, COALESCE(COUNT(student_id), 0) student_number
+FROM department a LEFT JOIN student b ON (a.dept_id = b.dept_id)
+GROUP BY a.dept_name
+ORDER BY student_number DESC, a.dept_name ASC
+
+
+
+## 603 Consecutive Available Seats
+
+SELECT seat_id FROM
+(
+SELECT current.seat_id, CASE WHEN exists (SELECT 1 FROM cinema previous WHERE previous.seat_id = current.seat_id - 1 AND previous.free = 1) AND current.free = 1 THEN current.seat_id - 1 ELSE NULL END previous,
+CASE WHEN exists (SELECT 1 FROM cinema next WHERE next.seat_id = current.seat_id + 1 AND next.free = 1) AND current.free = 1 THEN current.seat_id + 1 ELSE NULL END next
+FROM cinema current
+) seats
+WHERE seats.previous IS NOT NULL OR seats.next IS NOT NULL
+
+
+
+## 620 Not Boring Movies
+
+SELECT id, movie, description, rating FROM cinema
+WHERE id % 2 = 1 AND description NOT IN ('boring')
+ORDER BY rating DESC
+
+
+
+## 584 Find Customer Referee
+
+SELECT a.name FROM customer a
+LEFT OUTER JOIN customer b ON (a.referee_id = b.id)
+WHERE IFNULL(a.referee_id, -1) != 1
+ORDER BY a.id
