@@ -298,3 +298,65 @@ SELECT a.name FROM customer a
 LEFT OUTER JOIN customer b ON (a.referee_id = b.id)
 WHERE IFNULL(a.referee_id, -1) != 1
 ORDER BY a.id
+
+
+
+## 613 Shortest Distance in a Line
+
+SELECT MIN(ABS(p1.x - p2.x)) shortest FROM point p1, point p2 WHERE p1.x <> p2.x
+
+
+
+## 181 Employees Earning more than their Managers
+
+SELECT employee.Name AS Employee
+FROM Employee employee
+LEFT OUTER JOIN Employee manager ON (employee.ManagerId = manager.Id)
+WHERE employee.Salary > manager.Salary
+
+
+
+## 619 Biggest single number
+
+SELECT MAX(num) num FROM (SELECT num FROM number GROUP BY num HAVING COUNT(*) = 1) a
+
+
+
+## 185 Department top 3 Salaries
+
+SELECT d.name Department, e.name Employee, e.salary Salary
+FROM employee e INNER JOIN department d ON (e.departmentid = d.id)
+WHERE (SELECT COUNT(DISTINCT b.Salary) FROM employee AS b
+WHERE b.departmentid = e.departmentid AND b.Salary > e.Salary) < 3
+
+
+
+## 197 Rising Temperature
+
+SELECT tod.id FROM weather tod, weather yest
+WHERE tod.temperature > yest.temperature AND DATEDIFF(tod.RecordDate, yest.RecordDate) = 1
+
+
+
+## 597 Friend Request I
+
+SELECT CASE WHEN ROUND(accepted.count / requested.count, 2) IS NULL WHEN 0.00 ELSE ROUND(accepted.count / requested.count, 2) END accept_rate
+FROM (SELECT count(1) count FROM (SELECT DISTINCT requester_id, accepter_id FROM request_accepted) a) accepted,
+(SELECT count(1) count FROM (SELECT DISTINCT sender_id, send_to_if FROM friend_request) b) requested
+WHERE 1 = 1
+
+
+
+## 618 Students report by Geography
+
+SELECT America.name AS America, Asia.name AS Asia, Europe.name AS Europe
+FROM
+(SELECT name, @a :=@a + 1 AS id FROM student, (SELECT @a := 0) i WHERE continent = 'America' ORDER BY name) AS America LEFT JOIN
+(SELECT name, @b :=@b + 1 AS id FROM student, (SELECT @b := 0) i WHERE continent = 'Asia' ORDER BY name) AS Asia ON (America.id = Asia.id) LEFT JOIN
+(SELECT name, @c :=@c + 1 AS id FROM student, (SELECT @c := 0) i WHERE continent = 'Europe' ORDER BY name) AS Europe ON (America.id = Europe.id)
+
+
+
+## 586 Customer Placing the Largest Number of Orders
+
+SELECT customer_number FROM (SELECT customer_number, COUNT(order_number) order_count FROM orders GROUP BY customer_number) a ORDER BY order_count DESC LIMIT 1
