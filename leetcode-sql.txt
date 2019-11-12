@@ -360,3 +360,99 @@ FROM
 ## 586 Customer Placing the Largest Number of Orders
 
 SELECT customer_number FROM (SELECT customer_number, COUNT(order_number) order_count FROM orders GROUP BY customer_number) a ORDER BY order_count DESC LIMIT 1
+
+
+
+## 182 Duplicate Emails
+
+SELECT Email FROM Person GROUP BY Email HAVING COUNT(*) > 1
+
+
+
+## 612 Shortest Distance in a Plane
+
+SELECT ROUND(MIN(SQRT(POW(P1.y - P2.y, 2) + POW(P1.x - P2.x, 2))), 2) AS shortest
+FROM point_2d P1, point_2d P2
+WHERE p1.x <> P2.x OR P1.y <> P2.y
+
+
+
+## 196 Delete duplicate emails
+
+DELETE FROM person USING person, person b WHERE person.email = b.email AND person.id > b.id;
+SELECT * FROM person
+
+
+
+## 262 Trips and Users
+
+SELECT b.request_at Day, ROUND(SUM(CASE WHEN status LIKE 'cancelled%' THEN 1 ELSE 0 END)/COUNT(*), 2) 'Cancellation Rate'
+FROM users a, trips b
+WHERE a.banned = 'No'
+AND a.suers_id = b.client_id
+AND b.request_at >= '2013-10-01' and b.request_at <= '2013-10-03'
+GROUP BY b.request_at
+
+
+
+## 601 Human Traffic of Stadium
+
+SELECT DISTINCT day1.* FROM stadium day1, stadium day2, stadium day3
+WHERE day1.people >= 100 AND day2.people >= 100 AND day3.people >= 100 AND 
+((day1.id + 1 = day2.id AND day1.id + 2 = day3.id) OR
+(day1.id - 1 = day2.id AND day1.id + 1 = day3.id) OR
+(day1.id - 2 = day2.id AND day1.id -1 = day3.id))
+ORDER BY day1.id
+
+
+
+## 608 Tree Node
+
+SELECT id, CASE WHEN p_id IS NULL THEN 'Root'
+ELSE CASE WHEN EXISTS (SELECT 1 FROM tree t2 WHERE t2.p_id = t1.id)
+                    THEN 'Inner'
+                    ELSE 'Leaf'
+               END
+     END AS Type
+FROM tree t1 ORDER BY id
+
+
+
+## 177 Nth Highest Salary
+
+CREATE FUNCTION getNthHighestSalary(N INT) RETURNS INT
+BEGIN
+    SET N = N - 1;
+    RETURN (
+        SELECT DISTINCT salary FROM employee ORDER BY salary DESC LIMIT 1 OFFSET N
+    );
+END
+
+
+
+## 607 Salesperson
+
+SELECT s.name FROM salesperson s
+WHERE s.sales_id NOT IN (SELECT o.sales_id FROM orders o, company c WHERE o.com_id = c.com_id AND c.name = 'RED')
+
+
+
+## 626 Exchange Seats
+
+SELECT CASE
+WHEN s1.id = (SELECT MAX(s3.id) FROM seat s3) AND s1.id % 2 > 0
+THEN s1.id
+WHEN s1.id % 2 = 0
+THEN s1.id - (SELECT s2.id FROM seat s2 WHERE s2.id < s1.id LIMIT 1)
+WHEN s1.id % 2 > 0
+THEN s1.id + 1
+END id, student
+FROM seat s1
+ORDER BY id
+
+
+
+## 595 Big Countries
+
+SELECT name, population, area FROM World
+WHERE area > 3000000 OR population > 25000000
