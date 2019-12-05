@@ -1,0 +1,86 @@
+select sname, ssex, class from student
+
+select distinct depart from teacher
+
+select * from student
+
+select * from score where degree between 60 and 80
+
+select * from score where degree in (85, 86, 88)
+
+select * from student where class = '95031' or ssex = female
+
+select * from student order by class desc
+
+select * from score order by cno asc, degree desc
+
+select count(*) from student where class = '95031'
+
+select sno, cno from score where degree in (select max(degree) from score)
+
+select avg(degree) from score where cno = '3-105'
+
+select avg(degree) from score where cno like '3%' group by cno having count(*) >= 5
+
+select sno from score group by sno having min(degree) > 70 and max(degree) < 90
+
+select a.sname, b.cno, b.degree from student as a join score as b on a.sno = b.sno
+
+select a.name, b.sno, b.degree from course as a join score as b on a.cno = b.cno
+
+select a.sname, b.cname, c.degree from student as a join course as b join score as c on a.sno = c.sno and b.cno = c.cno
+
+select avg(degree) from score where sno in (select sno from student where class = '95033')
+
+select a.sno, a.cno, b.rank from score a join grade b where a.degree between b.below and b.upp order by rank
+
+select * from score where cno = '3-105' and degree > (select degree from score where sno = 109 and cno = '3-105')
+
+select * from score s inner join (select ss.sno, max(ss.degree) as maxd from score ss group by ss.sno having count(ss.cno) > 1) a on s.sno = a.sno and s.degree <> a.maxd
+
+select sno, sname, sbirthday from student where year(sbirthday) in (select year(sbirthday) from student where sno = 107)
+
+select degree from score where cno in (
+select cno from course where tno in (
+select tno from teacher where teacher = 'Zhang'))
+
+select a.tname from teacher a join (course b, score c) on a.tno = b.tno and b.cno = c.cno group by c.cno having count(*) > 5
+
+select * from student a inner join score b
+on a.sno = b.sno inner join course c
+on b.cno = c.cno inner join teacher d
+on c.tno = d.tno
+where a.class = '95033' or a.class = '95031'
+
+select distinct cno from score where degree > 85
+
+select a.*, b.cname, c.tname, c.depart from score a join (course b, teacher c) on a.cno = b.cno and b.tno = c.tno where c.depart = 'computer'
+
+select tname, prof from teacher where depart = 'computer' and prof not in (select prof from teacher where depart = 'electrical')
+
+select * from score as a, score as b where a.cno = '3-105' and b.cno = '3-245' and a.sno = b.sno and a.degree > b.degree order by a.degree desc
+
+select sname as name, ssex as sex, sbirthday as birthday from student union select tname as name, tsex as sex, tbirthday as birthday from teacher
+
+select a.* from score a where degree < (select avg(degree) from score b where a.cno = b.cno)
+
+select a.tname, a.depart from teacher a join course b on a.tno = b.tno
+
+select a.tname, a.depart from teacher a where not exists (select * from course b where a.tno = b.tno)
+
+select class from student where ssex = 'male' group by class having count(ssex) >= 2
+
+select * from student where sanme not like 'Wang%'
+
+select sname, year(curdate()) - year(sbirthday) age from student
+
+select sname, max(sbirthday) birthday from student where sbirthday in (select max(sbirthday) from student) union
+select sname, min(sbirthday) birthday from student where sbirthday in (select min(sbirthday) from student)
+
+select * from student order by class desc, year(now())-year(sbirthday) desc
+
+select a.tanme, b.cname from teacher a join course b on a.tno = b.tno where a.tsex = 'male'
+
+select sname from student where ssex in (select ssex from student where sname = 'Li' and class in) and class in (select class from student where sname = 'Li') and sname != 'Li'
+
+select a.* from score a join (course b, student c) on a.cno = b.cno and a.sno = c.sno where c.ssex = 'male' and a.cno in (select cno from course where cname = 'computer')
